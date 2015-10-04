@@ -1,5 +1,6 @@
 package in.prabakaran.nanodegreeproject;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -42,7 +43,7 @@ public class PortfolioFragment extends Fragment implements Button.OnClickListene
         String toastText = "";
         switch (v.getId()){
             case R.id.spotifyStreamerBtn:
-                toastText = getString(R.string.spotify_streamer);
+                startActivity(new Intent(v.getContext(),PopularMovies.class));
                 break;
             case R.id.scoresBtn:
                 toastText = getString(R.string.scores);
