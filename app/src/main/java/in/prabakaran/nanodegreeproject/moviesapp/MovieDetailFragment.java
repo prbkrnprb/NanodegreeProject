@@ -15,11 +15,11 @@ import in.prabakaran.nanodegreeproject.R;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MovieDetailActivityFragment extends Fragment {
+public class MovieDetailFragment extends Fragment {
 
     View rootView;
 
-    public MovieDetailActivityFragment() {
+    public MovieDetailFragment() {
     }
 
     @Override

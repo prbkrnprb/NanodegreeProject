@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,12 +18,13 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -42,8 +42,9 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
 
     MovieData movieData[];
     View rootView;
-    private final String POPULAR_MOVIES = "popular";
-    private final String TOP_RATED_MOVIES = "top_rated";
+    //private final String POPULAR_MOVIES = "popular";
+    //private final String TOP_RATED_MOVIES = "top_rated";
+    final String TMDB_IMAGE_DOWNLOAD_URL = "http://image.tmdb.org/t/p/w500";
     FetchMoviesTask fetchMoviesTask;
 
     private MovieThumbnailAdapter mMovieThumbnailAdapter;
@@ -67,9 +68,7 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
         movieGrid.setAdapter(mMovieThumbnailAdapter);
         movieGrid.setOnItemClickListener(this);
 
-
         //refreshData(getSortOrderFromPref());
-
         return rootView;
     }
 
@@ -121,14 +120,11 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
                 final String MOVIE_BACKDROP_PATH = "backdrop_path";
 
                 JSONObject jsonObject = new JSONObject(jsonString);
-                //int totalResults = Integer.parseInt(jsonObject.get(TOTAL_RESULTS).toString());
                 JSONArray movieAllJSONArray = jsonObject.getJSONArray(SINGLE_RESULTS);
                 resultData = new MovieData[movieAllJSONArray.length()];
-                //resultData = new MovieData[2];
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
                 for(int i=0; i<movieAllJSONArray.length();i++){
-                //for(int i=0; i<2;i++){
                     JSONObject movieJSONObject = movieAllJSONArray.getJSONObject(i);
                     resultData[i] = new MovieData();
                     resultData[i].id = movieJSONObject.getString(MOVIE_ID);
@@ -227,10 +223,12 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
 
         MovieData movieData[];
         LayoutInflater inflator;
+        Context context;
 
         public MovieThumbnailAdapter(Context context, int resource, MovieData[] movieData) {
             super(context, resource, movieData);
             this.movieData = movieData;
+            this.context = context;
             inflator = ((Activity)context).getLayoutInflater();
         }
 
@@ -252,11 +250,16 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
             viewHolder = (MovieThumbnailViewHolder) convertView.getTag();
             viewHolder.url = movieData[position].posterPath;
             viewHolder.movieData = movieData[position];
-            new MovieThumnailDownload().execute(viewHolder);
+//            new MovieThumnailDownload().execute(viewHolder);
+            Picasso.with(context).load(TMDB_IMAGE_DOWNLOAD_URL + viewHolder.url).into(viewHolder.imageView);
+//            viewHolder.imageView.buildDrawingCache();
+//            viewHolder.bitmap = viewHolder.imageView.getDrawingCache();
+//            BitmapDrawable drawable = (BitmapDrawable) viewHolder.imageView.getDrawable();
+//            viewHolder.bitmap = drawable.getBitmap();
             return convertView;
         }
 
-        public void addAll(MovieData[] movieData){
+        /*public void addAll(MovieData[] movieData){
             MovieData[] tempData = new MovieData[this.movieData.length + movieData.length];
 
             int i;
@@ -268,14 +271,14 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
 
             this.movieData = tempData;
             this.notifyDataSetChanged();
-        }
+        }*/
 
         public void replaceAll(MovieData[] movieData){
             this.movieData = movieData;
             this.notifyDataSetChanged();
         }
 
-        public class MovieThumnailDownload extends AsyncTask<MovieThumbnailViewHolder,Void,MovieThumbnailViewHolder>{
+        /*public class MovieThumnailDownload extends AsyncTask<MovieThumbnailViewHolder,Void,MovieThumbnailViewHolder>{
 
             private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
@@ -295,7 +298,7 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
             protected void onPostExecute(MovieThumbnailViewHolder movieThumbnailViewHolder) {
                 movieThumbnailViewHolder.imageView.setImageBitmap(movieThumbnailViewHolder.bitmap);
             }
-        }
+        }*/
     }
 }
 
