@@ -13,5 +13,23 @@
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_popular_movies">PopularMovies</string>
+    <string name="title_activity_movie_detail">Movie Details</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <string-array name="pref_sort_order_titles">
+        <item>Most Popular</item>
+        <item>Highest rated</item>
+    </string-array>
+    <string-array name="pref_sort_order_values">
+        <item>popular</item>
+        <item>top_rated</item>
+    </string-array>
+    <string name="pref_sort_order_title">Sort order</string>
+    <string name="pref_sort_order_key">sortorder</string>
+    <string name="pref_sort_order_default">popular</string>
+
+
 </resources>
 

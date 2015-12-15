@@ -77,5 +77,7 @@
         android:layout_alignLeft="@+id/xyzReaderBtn"
         android:layout_alignRight="@+id/xyzReaderBtn"
         android:layout_marginTop="10dp"
+
         android:background="#f03554" />
+
 </RelativeLayout>
