@@ -1,7 +1,6 @@
 package in.prabakaran.nanodegreeproject.moviesapp;
 
-import android.content.Intent;
-import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -33,18 +32,20 @@ public class MovieDetailFragment extends Fragment {
         TextView ratingTxt = (TextView) rootView.findViewById(R.id.movieRatingTxt);
         ImageView posterImage = (ImageView) rootView.findViewById(R.id.movieThumbnailImage);
 
-        Intent intent = getActivity().getIntent();
+//        Intent intent = getActivity().getIntent();
 
         //MovieData movieData =  intent.getParcelableExtra("MovieData");
         //Bitmap bitmap = intent.getParcelableExtra("ImagePoster");
-        MovieData movieData = StaticClassForIntent.movieData;
-        Bitmap bitmap = StaticClassForIntent.bitmap;
+        if(StaticClassForIntent.movieData != null) {
+            MovieData movieData = StaticClassForIntent.movieData;
+            Drawable poster = StaticClassForIntent.poster;
 
-        titleTxt.setText(movieData.title);
-        synopsisTxt.setText(movieData.overview);
-        releaseDate.setText(movieData.releaseDate.toString());
-        ratingTxt.setText(movieData.popularity.toString());
-        posterImage.setImageBitmap(bitmap);
+            titleTxt.setText(movieData.title);
+            synopsisTxt.setText(movieData.overview);
+            releaseDate.setText(movieData.releaseDate.toString());
+            ratingTxt.setText(movieData.popularity.toString());
+            posterImage.setImageDrawable(poster);
+        }
 
         return rootView;
     }

@@ -8,12 +8,27 @@ import android.view.MenuItem;
 
 import in.prabakaran.nanodegreeproject.R;
 
-public class PopularMovies extends ActionBarActivity {
+public class PopularMoviesActivity extends ActionBarActivity implements PopularMoviesFragment.Callback{
+
+
+    Boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_popular_movies);
+
+        if (findViewById(R.id.container_movie_detail) != null) {
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container_movie_detail, new MovieDetailFragment())
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
+        }
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
@@ -35,5 +50,17 @@ public class PopularMovies extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void beginDetailFragment() {
+        if(mTwoPane){
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container_movie_detail, new MovieDetailFragment())
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, MovieDetailActivity.class);
+            startActivity(intent);
+        }
     }
 }

@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".moviesapp.PopularMovies"
+            android:name=".moviesapp.PopularMoviesActivity"
             android:label="@string/title_activity_popular_movies"
             android:parentActivityName=".Portfolio">
             <meta-data
@@ -30,18 +30,18 @@
         <activity
             android:name=".moviesapp.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".moviesapp.PopularMovies">
+            android:parentActivityName=".moviesapp.PopularMoviesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="in.prabakaran.nanodegreeproject.moviesapp.PopularMovies" />
+                android:value=".moviesapp.PopularMoviesActivity" />
         </activity>
         <activity
             android:name=".moviesapp.MovieDetailActivity"
             android:label="@string/title_activity_movie_detail"
-            android:parentActivityName=".moviesapp.PopularMovies">
+            android:parentActivityName=".moviesapp.PopularMoviesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="in.prabakaran.nanodegreeproject.moviesapp.PopularMovies" />
+                android:value=".moviesapp.PopularMoviesActivity" />
         </activity>
     </application>
 

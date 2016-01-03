@@ -2,8 +2,8 @@ package in.prabakaran.nanodegreeproject.moviesapp;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,13 +18,12 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-import com.squareup.picasso.Picasso;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -38,7 +37,7 @@ import in.prabakaran.nanodegreeproject.R;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class PopularMoviesFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class PopularMoviesFragment extends Fragment implements AdapterView.OnItemClickListener,AdapterView.OnItemSelectedListener {
 
     MovieData movieData[];
     View rootView;
@@ -46,6 +45,8 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
     //private final String TOP_RATED_MOVIES = "top_rated";
     final String TMDB_IMAGE_DOWNLOAD_URL = "http://image.tmdb.org/t/p/w500";
     FetchMoviesTask fetchMoviesTask;
+    final String CURR_POSITION = "current position";
+    int mPosition;
 
     private MovieThumbnailAdapter mMovieThumbnailAdapter;
 
@@ -66,8 +67,12 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
 
         GridView movieGrid = (GridView) rootView.findViewById(R.id.movieGrid);
         movieGrid.setAdapter(mMovieThumbnailAdapter);
-        movieGrid.setOnItemClickListener(this);
 
+        if(savedInstanceState != null && savedInstanceState.containsKey(CURR_POSITION)){
+            movieGrid.setVerticalScrollbarPosition(savedInstanceState.getInt(CURR_POSITION));
+        }
+
+        movieGrid.setOnItemClickListener(this);
         //refreshData(getSortOrderFromPref());
         return rootView;
     }
@@ -89,14 +94,49 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
     }
 
     @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        MovieThumbnailViewHolder holder= (MovieThumbnailViewHolder) view.getTag();
+        mPosition = position;
+
+//        Intent intent = new Intent(this, MovieDetailActivity.class);
+        StaticClassForIntent.movieData = holder.movieData;
+//        StaticClassForIntent.bitmap = holder.bitmap;
+        StaticClassForIntent.poster = holder.imageView.getDrawable();
+        //intent.putExtra("MovieData", holder.movieData);
+        //intent.putExtra("ImagePoster",holder.bitmap);
+
+        ((Callback)getActivity()).beginDetailFragment();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if(mPosition != GridView.INVALID_POSITION){
+            outState.putInt(CURR_POSITION,mPosition);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    public interface Callback{
+        void beginDetailFragment();
+    }
+
+    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         MovieThumbnailViewHolder holder= (MovieThumbnailViewHolder) view.getTag();
-        Intent intent = new Intent(getActivity(), MovieDetailActivity.class);
+        mPosition = position;
+//        Intent intent = new Intent(this, MovieDetailActivity.class);
         StaticClassForIntent.movieData = holder.movieData;
-        StaticClassForIntent.bitmap = holder.bitmap;
-       //intent.putExtra("MovieData", holder.movieData);
-       //intent.putExtra("ImagePoster",holder.bitmap);
-        startActivity(intent);
+//        StaticClassForIntent.bitmap = holder.bitmap;
+        StaticClassForIntent.poster = holder.imageView.getDrawable();
+        //intent.putExtra("MovieData", holder.movieData);
+        //intent.putExtra("ImagePoster",holder.bitmap);
+
+        ((Callback)getActivity()).beginDetailFragment();
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, MovieData[]>{
@@ -250,12 +290,12 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
             viewHolder = (MovieThumbnailViewHolder) convertView.getTag();
             viewHolder.url = movieData[position].posterPath;
             viewHolder.movieData = movieData[position];
-//            new MovieThumnailDownload().execute(viewHolder);
-            Picasso.with(context).load(TMDB_IMAGE_DOWNLOAD_URL + viewHolder.url).into(viewHolder.imageView);
-//            viewHolder.imageView.buildDrawingCache();
-//            viewHolder.bitmap = viewHolder.imageView.getDrawingCache();
-//            BitmapDrawable drawable = (BitmapDrawable) viewHolder.imageView.getDrawable();
-//            viewHolder.bitmap = drawable.getBitmap();
+            new MovieThumnailDownload().execute(viewHolder);
+//            Picasso.with(context).load(TMDB_IMAGE_DOWNLOAD_URL + viewHolder.url).into(viewHolder.imageView);
+            viewHolder.imageView.buildDrawingCache();
+            viewHolder.bitmap = viewHolder.imageView.getDrawingCache();
+            //BitmapDrawable drawable = (BitmapDrawable) viewHolder.imageView.getDrawable();
+            //viewHolder.bitmap = drawable.getBitmap();
             return convertView;
         }
 
@@ -278,7 +318,7 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
             this.notifyDataSetChanged();
         }
 
-        /*public class MovieThumnailDownload extends AsyncTask<MovieThumbnailViewHolder,Void,MovieThumbnailViewHolder>{
+        public class MovieThumnailDownload extends AsyncTask<MovieThumbnailViewHolder,Void,MovieThumbnailViewHolder>{
 
             private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
@@ -298,7 +338,7 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
             protected void onPostExecute(MovieThumbnailViewHolder movieThumbnailViewHolder) {
                 movieThumbnailViewHolder.imageView.setImageBitmap(movieThumbnailViewHolder.bitmap);
             }
-        }*/
+        }
     }
 }
 

@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import in.prabakaran.nanodegreeproject.moviesapp.PopularMovies;
+import in.prabakaran.nanodegreeproject.moviesapp.PopularMoviesActivity;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -50,7 +50,7 @@ public class PortfolioFragment extends Fragment implements Button.OnClickListene
         String toastText = "";
         switch (v.getId()){
             case R.id.spotifyStreamerBtn:
-                startActivity(new Intent(v.getContext(),PopularMovies.class));
+                startActivity(new Intent(v.getContext(),PopularMoviesActivity.class));
                 break;
             case R.id.scoresBtn:
                 toastText = getString(R.string.scores);
