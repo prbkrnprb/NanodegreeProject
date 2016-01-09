@@ -53,13 +53,21 @@ public class PopularMoviesActivity extends ActionBarActivity implements PopularM
     }
 
     @Override
-    public void beginDetailFragment() {
+    public void beginDetailFragment(String movieId) {
+//        Toast.makeText(this,movieId,Toast.LENGTH_LONG);
         if(mTwoPane){
+            Bundle args = new Bundle();
+            args.putString(MovieDetailFragment.MOVIE_ID, movieId);
+
+            MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
+            movieDetailFragment.setArguments(args);
+
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container_movie_detail, new MovieDetailFragment())
+                    .replace(R.id.container_movie_detail, movieDetailFragment)
                     .commit();
         } else {
             Intent intent = new Intent(this, MovieDetailActivity.class);
+            intent.putExtra(MovieDetailFragment.MOVIE_ID,movieId);
             startActivity(intent);
         }
     }

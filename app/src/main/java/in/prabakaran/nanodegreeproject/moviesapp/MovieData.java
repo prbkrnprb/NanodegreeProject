@@ -1,5 +1,7 @@
 package in.prabakaran.nanodegreeproject.moviesapp;
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -16,6 +18,7 @@ public class MovieData implements Serializable{
     int voteCount;
     Double popularity;
     Date releaseDate;
+    Bitmap bitmap;
     public MovieData(){
         id = "";
         title = "";

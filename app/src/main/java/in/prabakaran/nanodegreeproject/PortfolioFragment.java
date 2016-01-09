@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import in.prabakaran.nanodegreeproject.dummy.Dummy_Activity;
 import in.prabakaran.nanodegreeproject.moviesapp.PopularMoviesActivity;
 
 /**
@@ -53,7 +54,7 @@ public class PortfolioFragment extends Fragment implements Button.OnClickListene
                 startActivity(new Intent(v.getContext(),PopularMoviesActivity.class));
                 break;
             case R.id.scoresBtn:
-                toastText = getString(R.string.scores);
+                startActivity(new Intent(v.getContext(),Dummy_Activity.class));
                 break;
             case R.id.libraryBtn:
                 toastText = getString(R.string.library);

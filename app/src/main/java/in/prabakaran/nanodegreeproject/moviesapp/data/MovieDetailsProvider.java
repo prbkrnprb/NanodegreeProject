@@ -38,7 +38,7 @@ public class MovieDetailsProvider extends ContentProvider {
         matcher.addURI(MovieDetailsContract.CONTENT_AUTHORITY,
                 MovieDetailsContract.PATH_MOVIE_TOP_RATED, MOVIE_DETAILS_TOP_RATED);
         matcher.addURI(MovieDetailsContract.CONTENT_AUTHORITY,
-                MovieDetailsContract.PATH_MOVIE_DETAILS + "/" + MOVIE_DETAILS_FAV, MOVIE_DETAILS_FAV);
+                MovieDetailsContract.PATH_MOVIE_DETAILS + "/" + MovieDetailsContract.PATH_MOVIE_FAV, MOVIE_DETAILS_FAV);
     }
 
     private static final SQLiteQueryBuilder sMovieDetailsByPopular = new SQLiteQueryBuilder();
@@ -102,7 +102,7 @@ public class MovieDetailsProvider extends ContentProvider {
                 returnCursor = dbHelper.getReadableDatabase().query(
                         MovieDetailsEntry.TABLE_NAME,
                         projection,
-                        MovieDetailsEntry.COLUMN_FAVOURITE + "= TRUE",
+                        MovieDetailsEntry.COLUMN_FAVOURITE + "= 1",
                         null,
                         null,
                         null,

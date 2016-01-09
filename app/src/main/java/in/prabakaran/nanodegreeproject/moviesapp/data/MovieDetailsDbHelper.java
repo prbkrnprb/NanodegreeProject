@@ -13,7 +13,7 @@ import in.prabakaran.nanodegreeproject.moviesapp.data.MovieDetailsContract.Movie
  */
 public class MovieDetailsDbHelper extends SQLiteOpenHelper{
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 15;
 
     private static final String DATABASE_NAME = "movie_details.db";
 
@@ -33,7 +33,8 @@ public class MovieDetailsDbHelper extends SQLiteOpenHelper{
                 + MovieDetailsEntry.COLUMN_VOTE_COUNT + " DOUBLE NOT NULL, "
                 + MovieDetailsEntry.COLUMN_POSTER_PATH + " TEXT NOT NULL, "
                 + MovieDetailsEntry.COLUMN_BACKDROP_PATH + " TEXT NOT NULL, "
-                + MovieDetailsEntry.COLUMN_FAVOURITE + " BOOLEAN, "
+//                + MovieDetailsEntry.COLUMN_POSTER_IMAGE + " BLOB, "
+                + MovieDetailsEntry.COLUMN_FAVOURITE + " BOOLEAN "
                 + ");";
 
         final String SQL_CREATE_MOVIE_POPULAR_TABLE = "CREATE TABLE " + MoviePopularEntry.TABLE_NAME + " ("
@@ -42,7 +43,7 @@ public class MovieDetailsDbHelper extends SQLiteOpenHelper{
 
                 + "FOREIGN KEY (" + MoviePopularEntry.COLUMN_MOVIE_ID + ") REFERENCES "
                 + MovieDetailsEntry.TABLE_NAME + " ("
-                + MovieDetailsEntry.COLUMN_MOVIE_ID + ");";
+                + MovieDetailsEntry.COLUMN_MOVIE_ID + "));";
 
         final String SQL_CREATE_MOVIE_TOP_RATED_TABLE = "CREATE TABLE " + MovieTopRatedEntry.TABLE_NAME + " ("
                 + MovieTopRatedEntry.COLUMN_RANK + " INTEGER PRIMARY KEY, "
@@ -50,11 +51,12 @@ public class MovieDetailsDbHelper extends SQLiteOpenHelper{
 
                 + "FOREIGN KEY (" + MovieTopRatedEntry.COLUMN_MOVIE_ID + ") REFERENCES "
                 + MovieDetailsEntry.TABLE_NAME + " ("
-                + MovieDetailsEntry.COLUMN_MOVIE_ID + ");";
+                + MovieDetailsEntry.COLUMN_MOVIE_ID + "));";
 
         db.execSQL(SQL_CREATE_MOVIE_DETAILS_TABLE);
         db.execSQL(SQL_CREATE_MOVIE_POPULAR_TABLE);
         db.execSQL(SQL_CREATE_MOVIE_TOP_RATED_TABLE);
+
     }
 
     @Override

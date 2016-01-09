@@ -8,6 +8,8 @@
     <string name="build_it_bigger">Build it bigger</string>
     <string name="xyz_reader">XYZ Reader</string>
     <string name="capstone">Capstone</string>
+    <string name="fav_button_on">Mark as Favourite</string>
+    <string name="fav_button_off">Remove from Favourites</string>
 
     <string name="toast_prefix_text">This button will launch my </string>
 
@@ -21,15 +23,19 @@
     <string-array name="pref_sort_order_titles">
         <item>Most Popular</item>
         <item>Highest rated</item>
+        <item>My Favourites</item>
     </string-array>
 
     <string-array name="pref_sort_order_values">
         <item>popular</item>
         <item>top_rated</item>
+        <item>favorite</item>
     </string-array>
+
     <string name="pref_sort_order_title">Sort order</string>
     <string name="pref_sort_order_key">sortorder</string>
     <string name="pref_sort_order_default">popular</string>
+    <string name="title_activity_dummy_">Dummy_Activity</string>
 
 
 </resources>
