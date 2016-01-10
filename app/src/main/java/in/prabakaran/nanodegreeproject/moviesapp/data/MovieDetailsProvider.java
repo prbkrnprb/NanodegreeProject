@@ -12,6 +12,8 @@ import android.net.Uri;
 import in.prabakaran.nanodegreeproject.moviesapp.data.MovieDetailsContract.MovieDetailsEntry;
 import in.prabakaran.nanodegreeproject.moviesapp.data.MovieDetailsContract.MoviePopularEntry;
 import in.prabakaran.nanodegreeproject.moviesapp.data.MovieDetailsContract.MovieTopRatedEntry;
+import in.prabakaran.nanodegreeproject.moviesapp.data.MovieDetailsContract.MovieTrailersEntry;
+import in.prabakaran.nanodegreeproject.moviesapp.data.MovieDetailsContract.MovieReviewsEntry;
 
 /**
  * Created by Prabakaran on 03-01-2016.
@@ -25,6 +27,8 @@ public class MovieDetailsProvider extends ContentProvider {
     public static final int MOVIE_DETAILS_FAV = 102;
     public static final int MOVIE_DETAILS_POPULAR = 200;
     public static final int MOVIE_DETAILS_TOP_RATED = 300;
+    public static final int MOVIE_TRAILERS = 400;
+    public static final int MOVIE_REVIEWS = 500;
 
     private static UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
 
@@ -39,6 +43,10 @@ public class MovieDetailsProvider extends ContentProvider {
                 MovieDetailsContract.PATH_MOVIE_TOP_RATED, MOVIE_DETAILS_TOP_RATED);
         matcher.addURI(MovieDetailsContract.CONTENT_AUTHORITY,
                 MovieDetailsContract.PATH_MOVIE_DETAILS + "/" + MovieDetailsContract.PATH_MOVIE_FAV, MOVIE_DETAILS_FAV);
+        matcher.addURI(MovieDetailsContract.CONTENT_AUTHORITY,
+                MovieDetailsContract.PATH_MOVIE_TRAILERS, MOVIE_TRAILERS);
+        matcher.addURI(MovieDetailsContract.CONTENT_AUTHORITY,
+                MovieDetailsContract.PATH_MOVIE_REVIEWS, MOVIE_REVIEWS);
     }
 
     private static final SQLiteQueryBuilder sMovieDetailsByPopular = new SQLiteQueryBuilder();
@@ -131,6 +139,28 @@ public class MovieDetailsProvider extends ContentProvider {
                         MovieTopRatedEntry.COLUMN_RANK + " ASC"
                 );
                 break;
+            case MOVIE_TRAILERS:
+                returnCursor = dbHelper.getReadableDatabase().query(
+                        MovieTrailersEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            case MOVIE_REVIEWS:
+                returnCursor = dbHelper.getReadableDatabase().query(
+                        MovieReviewsEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -151,6 +181,10 @@ public class MovieDetailsProvider extends ContentProvider {
                 return MoviePopularEntry.CONTENT_TYPE;
             case MOVIE_DETAILS_TOP_RATED:
                 return MovieTopRatedEntry.CONTENT_TYPE;
+            case MOVIE_TRAILERS:
+                return MovieTrailersEntry.CONTENT_TYPE;
+            case MOVIE_REVIEWS:
+                return MovieReviewsEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -189,6 +223,24 @@ public class MovieDetailsProvider extends ContentProvider {
                 }
                 break;
             }
+            case MOVIE_TRAILERS: {
+                long _id = db.insert(MovieTrailersEntry.TABLE_NAME, null, values);
+                if (_id != 0) {
+                    returnUri = MovieTrailersEntry.buildMovieTrailerUri(_id);
+                } else {
+                    throw new android.database.SQLException("Failed to insert into Movie Trailers table " + uri);
+                }
+                break;
+            }
+            case MOVIE_REVIEWS: {
+                long _id = db.insert(MovieReviewsEntry.TABLE_NAME, null, values);
+                if (_id != 0) {
+                    returnUri = MovieReviewsEntry.buildMovieReviewUri(_id);
+                } else {
+                    throw new android.database.SQLException("Failed to insert into Movie Reviews table " + uri);
+                }
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -214,6 +266,14 @@ public class MovieDetailsProvider extends ContentProvider {
                 returnRows = db.delete(MovieTopRatedEntry.TABLE_NAME,selection,selectionArgs);
                 break;
             }
+            case MOVIE_TRAILERS: {
+                returnRows = db.delete(MovieTrailersEntry.TABLE_NAME,selection,selectionArgs);
+                break;
+            }
+            case MOVIE_REVIEWS: {
+                returnRows = db.delete(MovieReviewsEntry.TABLE_NAME,selection,selectionArgs);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -232,12 +292,26 @@ public class MovieDetailsProvider extends ContentProvider {
                 returnRows = db.update(MovieDetailsEntry.TABLE_NAME,values,selection,selectionArgs);
                 break;
             }
+            case MOVIE_DETAILS: {
+                String movieId = MovieDetailsEntry.getMovieIdFromUri(uri);
+                returnRows = db.update(MovieDetailsEntry.TABLE_NAME,values,MovieDetailsEntry.COLUMN_MOVIE_ID + "= ?",
+                        new String[]{movieId});
+                break;
+            }
             case MOVIE_DETAILS_POPULAR: {
                 returnRows = db.update(MoviePopularEntry.TABLE_NAME,values,selection,selectionArgs);
                 break;
             }
             case MOVIE_DETAILS_TOP_RATED: {
                 returnRows = db.update(MovieTopRatedEntry.TABLE_NAME,values,selection,selectionArgs);
+                break;
+            }
+            case MOVIE_TRAILERS: {
+                returnRows = db.update(MovieTrailersEntry.TABLE_NAME,values,selection,selectionArgs);
+                break;
+            }
+            case MOVIE_REVIEWS: {
+                returnRows = db.update(MovieReviewsEntry.TABLE_NAME,values,selection,selectionArgs);
                 break;
             }
             default:

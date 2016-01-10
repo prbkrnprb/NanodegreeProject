@@ -35,7 +35,7 @@ public class MovieThumbnailAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         MovieViewHolder movieViewHolder = (MovieViewHolder) view.getTag();
         movieViewHolder.movieId = cursor.getString(0);
-        Picasso.with(mContext).load(PopularMoviesFragment.TMDB_IMAGE_DOWNLOAD_URL + cursor.getString(1)).into(movieViewHolder.imageView);
+        Picasso.with(mContext).load(Utility.TMDB_IMAGE_DOWNLOAD_URL + cursor.getString(1)).into(movieViewHolder.imageView);
     }
 
     public static class MovieViewHolder{
