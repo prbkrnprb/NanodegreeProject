@@ -1,11 +1,12 @@
 package in.prabakaran.nanodegreeproject.moviesapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
 import in.prabakaran.nanodegreeproject.R;
 
-public class MovieDetailActivity extends ActionBarActivity {
+public class MovieDetailActivity extends ActionBarActivity implements MovieDetailFragment.Callback{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,4 +28,8 @@ public class MovieDetailActivity extends ActionBarActivity {
         }
     }
 
+    @Override
+    public void onTrailerReviewClick(Intent intent) {
+        startActivity(intent);
+    }
 }

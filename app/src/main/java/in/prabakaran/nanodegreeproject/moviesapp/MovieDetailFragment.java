@@ -1,7 +1,9 @@
 package in.prabakaran.nanodegreeproject.moviesapp;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
+import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -28,26 +31,28 @@ import org.json.JSONObject;
 import in.prabakaran.nanodegreeproject.R;
 import in.prabakaran.nanodegreeproject.moviesapp.data.MovieDetailsContract;
 
-/**
- * A placeholder fragment containing a simple view.
- */
-public class MovieDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
 
-    View rootView;
+public class MovieDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener, ListView.OnItemClickListener {
+
+    View rootView,detailView;
 
     public static final String MOVIE_ID = "movie_id";
     public static final int DETAIL_LOADER = 0;
     public static final int TRAILER_LOADER = 1;
+    public static final int REVIEW_LOADER = 2;
     private String mMovieId;
 
-    TextView titleTxt;
-    TextView synopsisTxt;
-    TextView releaseDate;
-    TextView ratingTxt;
-    ImageView posterImage;
+    TextView mTitleTextView;
+    TextView mSynopsisTextView;
+    TextView mReleaseDateTextView;
+    TextView mRatingTextView;
+    ImageView mPosterImageView;
     Button mFavButton;
-    ListView trailerListView;
-    TrailerAdapter trailerAdapter;
+    ListView mTrailerReviewListView;
+    DetailsAdapter mDetailsAdapter;
+    Cursor mTrailerCursor;
+
+    private final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
 
     public MovieDetailFragment() {
     }
@@ -55,17 +60,21 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        Log.v(LOG_TAG, "onCreateView");
+
         rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+        detailView = getActivity().getLayoutInflater().inflate(R.layout.detail_container, null);
 
-        titleTxt = (TextView) rootView.findViewById(R.id.movieTitleTxt);
-        synopsisTxt = (TextView) rootView.findViewById(R.id.movieSynopsisTxt);
-        releaseDate = (TextView) rootView.findViewById(R.id.movieReleaseDateTxt);
-        ratingTxt = (TextView) rootView.findViewById(R.id.movieRatingTxt);
-        posterImage = (ImageView) rootView.findViewById(R.id.movieThumbnailImage);
-        mFavButton = (Button) rootView.findViewById(R.id.favButton);
-        trailerListView = (ListView) rootView.findViewById(R.id.trailerList);
+        mTitleTextView = (TextView) detailView.findViewById(R.id.movieTitleTxt);
+        mSynopsisTextView = (TextView) detailView.findViewById(R.id.movieSynopsisTxt);
+        mReleaseDateTextView = (TextView) detailView.findViewById(R.id.movieReleaseDateTxt);
+        mRatingTextView = (TextView) detailView.findViewById(R.id.movieRatingTxt);
+        mPosterImageView = (ImageView) detailView.findViewById(R.id.movieThumbnailImage);
+        mFavButton = (Button) detailView.findViewById(R.id.favButton);
+        mTrailerReviewListView = (ListView) rootView.findViewById(R.id.trailerList);
 
-        trailerAdapter = new TrailerAdapter(
+        mDetailsAdapter = new DetailsAdapter(
                 getActivity(),
                 null,
                 0
@@ -75,13 +84,16 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         if(args != null) {
             mMovieId = args.getString(MOVIE_ID);
-            new FetchAdvancedMoviesTask().execute(mMovieId);
+            if(Utility.isOnline(getActivity()))
+                new FetchAdvancedMoviesTask().execute(mMovieId);
             getLoaderManager().initLoader(DETAIL_LOADER, null, this);
             getLoaderManager().initLoader(TRAILER_LOADER, null, this);
         }
 
         mFavButton.setOnClickListener(this);
-        trailerListView.setAdapter(trailerAdapter);
+        mTrailerReviewListView.addHeaderView(detailView);
+        mTrailerReviewListView.setOnItemClickListener(this);
+        mTrailerReviewListView.setAdapter(mDetailsAdapter);
 
         return rootView;
     }
@@ -108,6 +120,18 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                         MovieDetailsContract.MovieTrailersEntry.COLUMN_MOVIE_ID + "=?",
                         new String[]{mMovieId},
                         null);
+            case REVIEW_LOADER:
+                return new CursorLoader(getActivity(),
+                        MovieDetailsContract.MovieReviewsEntry.CONTENT_URI,
+                        new String[]{
+                                MovieDetailsContract.MovieReviewsEntry._ID,
+                                MovieDetailsContract.MovieReviewsEntry.COLUMN_AUTHOR,
+                                MovieDetailsContract.MovieReviewsEntry.COLUMN_REVIEW,
+                                MovieDetailsContract.MovieReviewsEntry.COLUMN_URL
+                        },
+                        MovieDetailsContract.MovieReviewsEntry.COLUMN_MOVIE_ID + "=?",
+                        new String[]{mMovieId},
+                        null);
         }
 
         return null;
@@ -119,16 +143,16 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         switch (loader.getId()){
             case DETAIL_LOADER:
                 if (data != null && data.moveToFirst()) {
-                    titleTxt.setText(data.getString(data.getColumnIndex(MovieDetailsContract.MovieDetailsEntry.COLUMN_TITLE)));
-                    synopsisTxt.setText(data.getString(data.getColumnIndex(MovieDetailsContract.MovieDetailsEntry.COLUMN_OVERVIEW)));
+                    mTitleTextView.setText(data.getString(data.getColumnIndex(MovieDetailsContract.MovieDetailsEntry.COLUMN_TITLE)));
+                    mSynopsisTextView.setText(data.getString(data.getColumnIndex(MovieDetailsContract.MovieDetailsEntry.COLUMN_OVERVIEW)));
                     int year = Utility.formatDateToYear(data.getString(
                             data.getColumnIndex(MovieDetailsContract.MovieDetailsEntry.COLUMN_RELEASE_DATE)));
-                    releaseDate.setText(year + "");
-                    ratingTxt.setText(Utility.formatRating(
+                    mReleaseDateTextView.setText(year + "");
+                    mRatingTextView.setText(Utility.formatRating(
                             data.getDouble(data.getColumnIndex(MovieDetailsContract.MovieDetailsEntry.COLUMN_VOTE_AVG))));
                     Picasso.with(getActivity()).load(Utility.TMDB_IMAGE_DOWNLOAD_URL + data.getString(
                             data.getColumnIndex(MovieDetailsContract.MovieDetailsEntry.COLUMN_POSTER_PATH)
-                    )).into(posterImage);
+                    )).into(mPosterImageView);
 
                     mFavButton.setText((data.getInt(data.getColumnIndex(MovieDetailsContract.MovieDetailsEntry.COLUMN_FAVOURITE)) == 0)?
                             getString(R.string.fav_button_on) : getString(R.string.fav_button_off));
@@ -136,7 +160,13 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 break;
 
             case TRAILER_LOADER:
-                trailerAdapter.swapCursor(data);
+                mTrailerCursor = data;
+                getLoaderManager().initLoader(REVIEW_LOADER, null, this);
+                break;
+
+            case REVIEW_LOADER:
+                MergeCursor mergeCursor = new MergeCursor(new Cursor[]{mTrailerCursor,data});
+                mDetailsAdapter.swapCursor(mergeCursor);
                 break;
         }
 
@@ -146,7 +176,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public void onLoaderReset(Loader<Cursor> loader) {
         switch (loader.getId()){
             case TRAILER_LOADER:
-                trailerAdapter.swapCursor(null);
+            case REVIEW_LOADER:
+                mDetailsAdapter.swapCursor(null);
         }
     }
 
@@ -158,6 +189,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
                 Boolean value = mFavButton.getText() == getString(R.string.fav_button_on)? Boolean.TRUE : Boolean.FALSE;
 
+                Log.v(LOG_TAG, "onClick movie id : " + mMovieId);
+                Log.v(LOG_TAG, "onClick mFavButton.getText() : " + mFavButton.getText());
+
                 values.put(MovieDetailsContract.MovieDetailsEntry.COLUMN_FAVOURITE, value);
 
                 int updatedRows = getActivity().getContentResolver().update(
@@ -168,12 +202,37 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                         );
 
                 if(updatedRows <=0)
-                    Toast.makeText(getActivity(),"Error in adding to favorites list",Toast.LENGTH_LONG);
+                    Toast.makeText(getActivity(),"Error in adding to favorites list",Toast.LENGTH_LONG).show();
                 else
                     mFavButton.setText(mFavButton.getText() == getString(R.string.fav_button_on)?
                         getString(R.string.fav_button_off):getString(R.string.fav_button_on));
+
+                break;
         }
 
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        DetailsAdapter.TrailerViewHolder trailerViewHolder = (DetailsAdapter.TrailerViewHolder) view.getTag();
+        String url="";
+        switch (trailerViewHolder.type){
+            case DetailsAdapter.TYPE_TRAILER:
+                url = Utility.YOUTUBE_URI + trailerViewHolder.key;
+                break;
+            case DetailsAdapter.TYPE_REVIEW:
+                url = trailerViewHolder.reviewUrlTxt.getText().toString();
+                break;
+        }
+
+        Log.v(LOG_TAG, "onItemClick url : " + url);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        ((Callback) getActivity()).onTrailerReviewClick(intent);
+    }
+
+    public interface Callback {
+        void onTrailerReviewClick(Intent intent);
     }
 
     public class FetchAdvancedMoviesTask extends AsyncTask<String, Void, MovieAdvancedData> {
@@ -245,6 +304,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     .build();
             jsonTrailerServerValue = Utility.getDataFromUri(uri);
 
+            Log.v(LOG_TAG, "Data from server Trailer data : " + jsonTrailerServerValue);
+
             uri = Uri.parse(Utility.TMDB_API_BASE_URL).buildUpon()
                     .appendPath(params[0])
                     .appendPath(Utility.TMDB_API_REVIEW_PATH)
@@ -253,12 +314,16 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
             jsonReviewServerValue = Utility.getDataFromUri(uri);
 
+            Log.v(LOG_TAG, "Data from server Review data : " + jsonReviewServerValue);
+
             uri = Uri.parse(Utility.TMDB_API_BASE_URL).buildUpon()
                     .appendPath(params[0])
                     .appendQueryParameter(Utility.API_KEY_PARM, Utility.API_KEY_VALUE)
                     .build();
 
             jsonAdvancedServerValue = Utility.getDataFromUri(uri);
+
+            Log.v(LOG_TAG, "Data from server Advanced data : " + jsonAdvancedServerValue);
 
             MovieAdvancedData movieAdvancedData = getMovieDataFromJSON(jsonAdvancedServerValue,jsonTrailerServerValue,jsonReviewServerValue);
             movieAdvancedData.id = params[0];
@@ -290,6 +355,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     values,
                     null,
                     null);
+
+            Log.v(LOG_TAG, "addAdvancedMovieDetails updatedRows : " + updatedRows);
+
             if(updatedRows <= 0)
                 return false;
             return true;
@@ -318,6 +386,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
                 Uri uri = getActivity().getContentResolver().insert(MovieDetailsContract.MovieTrailersEntry.CONTENT_URI, values);
 
+                Log.v(LOG_TAG, "addTrailerDetails uri : " + uri);
+
                 continue;
             }
         }
@@ -344,6 +414,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 values.put(MovieDetailsContract.MovieReviewsEntry.COLUMN_MOVIE_ID, movieAdvancedData.id);
 
                 Uri uri = getActivity().getContentResolver().insert(MovieDetailsContract.MovieReviewsEntry.CONTENT_URI, values);
+
+                Log.v(LOG_TAG, "addReviewDetails uri : " + uri);
 
                 continue;
             }

@@ -23,11 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -110,7 +105,8 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
     private void refreshData(String contentType) {
         if(!contentType.equals(SORT_ORDER_FAVORITE)) {
             fetchBasicMoviesTask = new FetchBasicMoviesTask();
-            fetchBasicMoviesTask.execute(contentType);
+            if(Utility.isOnline(getActivity()))
+                fetchBasicMoviesTask.execute(contentType);
         }
     }
 
@@ -286,57 +282,14 @@ public class PopularMoviesFragment extends Fragment implements AdapterView.OnIte
             }
             Log.v(LOG_TAG, "params : " + params[0]);
 
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
+            Uri uri = Uri.parse(Utility.TMDB_API_BASE_URL).buildUpon()
+                    .appendPath(params[0])
+                    .appendQueryParameter(Utility.API_KEY_PARM, Utility.API_KEY_VALUE)
+                    .build();
 
-            String jsonServerValue = null;
-            try {
-                Uri uri = Uri.parse(Utility.TMDB_API_BASE_URL).buildUpon()
-                        .appendPath(params[0])
-                        .appendQueryParameter(Utility.API_KEY_PARM, Utility.API_KEY_VALUE)
-                        .build();
-                Log.v(LOG_TAG, "uri : " + uri.toString());
+            String jsonServerValue = Utility.getDataFromUri(uri);
 
-                URL url = new URL(uri.toString());
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    Log.w(LOG_TAG, "No response from server");
-                    return null;
-                }
-
-                jsonServerValue = buffer.toString();
-                Log.v(LOG_TAG, "JSON Value string: " + jsonServerValue);
-
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Exception", e);
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final Exception e) {
-                        Log.e(LOG_TAG, "Error closing streams", e);
-                    }
-                }
-            }
+            Log.v(LOG_TAG, "Data from server : " + jsonServerValue);
 
             return getMovieDataFromJSON(jsonServerValue);
         }

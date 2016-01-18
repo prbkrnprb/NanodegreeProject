@@ -1,5 +1,8 @@
 package in.prabakaran.nanodegreeproject.moviesapp;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
 
@@ -31,6 +34,7 @@ public class Utility {
     public static final String TMDB_API_TRAILER_PATH = "videos";
     public static final String TMDB_API_REVIEW_PATH = "reviews";
     public static final String TMDB_IMAGE_DOWNLOAD_URL = "http://image.tmdb.org/t/p/w500";
+    public static final String YOUTUBE_URI = "vnd.youtube:";
 
     public static int formatDateToYear(String inpDate){
         String patern = "EEE MMM d hh:mm:ss zzz yyyy";
@@ -104,6 +108,13 @@ public class Utility {
             }
         }
         return jsonServerValue;
+    }
+
+    public static boolean isOnline(Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 }
 
